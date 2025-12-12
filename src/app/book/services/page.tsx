@@ -11,14 +11,12 @@ type Service = {
   price_cents: number;
 };
 
-// This is a client component, but it fetches data like a server component would.
-// For a production app, you might use React Query or SWR for more advanced data fetching.
 async function getServices(): Promise<Service[]> {
-  // This fetch is intentionally left without a full URL to work with Next.js's fetch API.
-  // In a real-world scenario, you would use the full URL of your API.
-  // For this project, this will be handled by the Next.js server.
-  const res = await fetch('/api/services'); // A new, public-facing API route
+  const res = await fetch('/api/services');
   if (!res.ok) {
+    if (res.status === 503) {
+      throw new Error('The booking service is temporarily unavailable. Please try again later.');
+    }
     throw new Error('Failed to fetch services');
   }
   return res.json();
@@ -44,7 +42,12 @@ export default function ServicesPage() {
   }, []);
 
   if (loading) return <div>Loading services...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (error) return (
+    <div className="text-center text-red-600">
+        <h2 className="text-xl font-bold">An Error Occurred</h2>
+        <p>{error}</p>
+    </div>
+  );
 
   return (
     <div>

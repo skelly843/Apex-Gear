@@ -1,29 +1,62 @@
 import { geocodingClient } from '@/lib/mapbox';
 import { supabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
+import { geocodeSchema } from '@/lib/schemas';
+import { ZodError } from 'zod';
+
+const rateLimitMap = new Map<string, number>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const limit = 10; // 10 requests
+  const window = 60 * 1000; // 1 minute
+
+  const userRequests = rateLimitMap.get(ip) || 0;
+  if (userRequests >= limit) {
+    // Check if the time window has passed
+    const lastRequestTime = rateLimitMap.get(`${ip}-time`) || 0;
+    if (now - lastRequestTime > window) {
+      rateLimitMap.set(ip, 1);
+      rateLimitMap.set(`${ip}-time`, now);
+      return false;
+    }
+    return true;
+  }
+
+  rateLimitMap.set(ip, userRequests + 1);
+  if (!rateLimitMap.has(`${ip}-time`)) {
+    rateLimitMap.set(`${ip}-time`, now);
+  }
+  return false;
+}
 
 export async function POST(request: Request) {
-  if (!geocodingClient) {
-    return NextResponse.json({ error: 'Geocoding service not configured' }, { status: 500 });
+  const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
+  if (isRateLimited(ip)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 
-  const { address } = await request.json();
-
-  if (!address) {
-    return NextResponse.json({ error: 'Address is required' }, { status: 400 });
-  }
-
+  console.log('Received request to /api/geocode');
   try {
-    // 1. Geocode the address
+    if (!geocodingClient) {
+      console.error('Geocoding service not configured');
+      return NextResponse.json({ error: 'Geocoding service not configured' }, { status: 500 });
+    }
+
+    const json = await request.json();
+    const { address } = geocodeSchema.parse(json);
+
+    console.log(`Geocoding address: ${address}`);
     const geocodeResponse = await geocodingClient
       .forwardGeocode({
         query: address,
         limit: 1,
-        countries: ['US'], // Assuming US for now
+        countries: ['US'],
       })
       .send();
 
     if (!geocodeResponse.body.features.length) {
+      console.warn('Could not geocode address');
       return NextResponse.json({ error: 'Could not geocode address' }, { status: 400 });
     }
 
@@ -32,7 +65,7 @@ export async function POST(request: Request) {
     const lat = feature.center[1];
     const postcode = feature.context.find(c => c.id.startsWith('postcode'))?.text;
 
-    // 2. Find a matching zone
+    console.log(`Fetching zones...`);
     const { data: zones, error } = await supabaseAdmin.from('zones').select('*');
 
     if (error) {
@@ -42,16 +75,13 @@ export async function POST(request: Request) {
 
     let matchedZone = null;
 
-    // Find zone by ZIP code first
     if (postcode) {
       matchedZone = zones.find(zone =>
         zone.type === 'zip_list' && zone.zip_codes.includes(postcode)
       );
     }
 
-    // If no ZIP match, check by radius
     if (!matchedZone) {
-      // Haversine formula to calculate distance
       const toRad = (x: number) => x * Math.PI / 180;
       const R = 3959; // Earth radius in miles
 
@@ -72,14 +102,14 @@ export async function POST(request: Request) {
       }
     }
 
-    if (matchedZone) {
-        return NextResponse.json({ zone: matchedZone, lat, lng });
-    } else {
-        return NextResponse.json({ zone: null, lat, lng });
-    }
+    console.log(`Zone match: ${matchedZone ? matchedZone.name : 'None'}`);
+    return NextResponse.json({ zone: matchedZone, lat, lng });
 
   } catch (error) {
-    console.error(error);
+    if (error instanceof ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    console.error('Internal server error.', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

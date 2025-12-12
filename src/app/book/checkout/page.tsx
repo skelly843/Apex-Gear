@@ -23,10 +23,10 @@ export default function CheckoutPage() {
 
     const formData = new FormData(event.currentTarget);
     const customerDetails = {
-      customer_name: formData.get('name'),
-      customer_email: formData.get('email'),
-      customer_phone: formData.get('phone'),
-      address,
+      customer_name: formData.get('name') as string,
+      customer_email: formData.get('email') as string,
+      customer_phone: formData.get('phone') as string,
+      address: address!,
       zone_id: zoneId ? parseInt(zoneId) : null,
       lat: lat ? parseFloat(lat) : null,
       lng: lng ? parseFloat(lng) : null,
@@ -38,7 +38,7 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          serviceId,
+          serviceId: Number(serviceId),
           startTime: slot,
           customerDetails,
         }),
@@ -46,24 +46,42 @@ export default function CheckoutPage() {
 
       if (!holdResponse.ok) {
         const { error } = await holdResponse.json();
-        throw new Error(error || 'Could not place a hold on this slot.');
+        throw new Error(error[0]?.message || 'Could not place a hold on this slot.');
       }
 
       const { booking } = await holdResponse.json();
 
-      // 2. "Process Payment" (stubbed)
-      const confirmResponse = await fetch('/api/confirm', {
+      // 2. "Process Payment" - call the checkout session endpoint
+      const sessionResponse = await fetch('/api/create-checkout-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ bookingId: booking.id }),
       });
 
-      if (!confirmResponse.ok) {
-        const { error } = await confirmResponse.json();
-        throw new Error(error || 'Payment failed.');
+      if (!sessionResponse.ok) {
+          throw new Error('Could not create a checkout session.');
       }
 
-      router.push('/book/confirmation');
+      const session = await sessionResponse.json();
+
+      // If we're in the mock flow, the session ID will start with 'mock_'
+      if (session.id.startsWith('mock_')) {
+          // Manually confirm the booking, since there's no real payment
+          const confirmResponse = await fetch('/api/confirm', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ bookingId: booking.id }),
+          });
+
+          if (!confirmResponse.ok) {
+              throw new Error('Failed to confirm booking');
+          }
+          router.push(`/book/confirmation?bookingId=${booking.id}`);
+      } else {
+          // In a real scenario, you would redirect to Stripe here
+          // router.push(session.url);
+          console.log('Redirect to Stripe Checkout:', session.id);
+      }
 
     } catch (err: any) {
       setError(err.message);
@@ -91,8 +109,12 @@ export default function CheckoutPage() {
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
+        <p className="text-sm text-gray-500">
+          Payment is not yet configured. Clicking "Confirm" will simulate a successful booking without a real payment.
+        </p>
+
         <button type="submit" disabled={loading} className="w-full rounded-md bg-indigo-600 px-4 py-2 text-white font-semibold hover:bg-indigo-500 disabled:bg-gray-400">
-          {loading ? 'Processing...' : 'Confirm & Pay'}
+          {loading ? 'Processing...' : 'Confirm Booking'}
         </button>
       </form>
     </div>

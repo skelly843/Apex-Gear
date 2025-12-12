@@ -1,29 +1,57 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { verify } from 'jsonwebtoken';
+import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import type { CookieOptions } from '@supabase/ssr';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'a-secure-default-secret';
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
-export function middleware(request: NextRequest) {
-  const token = request.cookies.get('auth_token')?.value;
+  const supabase = createServerClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          request.cookies.set({ name, value, ...options });
+          response = NextResponse.next({
+            request: { headers: request.headers },
+          });
+          response.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          request.cookies.set({ name, value: '', ...options });
+          response = NextResponse.next({
+            request: { headers: request.headers },
+          });
+          response.cookies.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
 
-  // Allow login page and auth API to be accessed without a token
-  if (request.nextUrl.pathname.startsWith('/admin/login') || request.nextUrl.pathname.startsWith('/api/auth')) {
-    return NextResponse.next();
-  }
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!token) {
+  const isAuthPage = request.nextUrl.pathname.startsWith('/admin/login');
+
+  if (!session && !isAuthPage) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  try {
-    verify(token, JWT_SECRET);
-    return NextResponse.next();
-  } catch (err) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
+  if (session && isAuthPage) {
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
   }
+
+  return response;
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'], // Protect all admin pages and admin-specific APIs
+  matcher: ['/admin/:path*'],
 };
