@@ -2,7 +2,10 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const { data, error } = await supabaseAdmin
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
+  const { data, error }  = await supabaseAdmin
     .from('service_types')
     .select('*')
     .order('name');
@@ -15,6 +18,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
   const service = await request.json();
 
   const { data, error } = await supabaseAdmin

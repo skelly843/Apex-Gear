@@ -3,8 +3,12 @@ import { NextResponse } from 'next/server';
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
+  const params = await context.params;
   const block = await request.json();
 
   const { data, error } = await supabaseAdmin
@@ -23,8 +27,12 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: any
 ) {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
+  const params = await context.params;
   const { error } = await supabaseAdmin
     .from('blocks')
     .delete()

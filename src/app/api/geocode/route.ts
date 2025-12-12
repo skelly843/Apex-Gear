@@ -31,6 +31,9 @@ function isRateLimited(ip: string): boolean {
 }
 
 export async function POST(request: Request) {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
   const ip = request.headers.get('x-forwarded-for') ?? '127.0.0.1';
   if (isRateLimited(ip)) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
@@ -63,7 +66,7 @@ export async function POST(request: Request) {
     const feature = geocodeResponse.body.features[0];
     const lng = feature.center[0];
     const lat = feature.center[1];
-    const postcode = feature.context.find(c => c.id.startsWith('postcode'))?.text;
+    const postcode = feature.context.find((c: any) => c.id.startsWith('postcode'))?.text;
 
     console.log(`Fetching zones...`);
     const { data: zones, error } = await supabaseAdmin.from('zones').select('*');
@@ -107,7 +110,7 @@ export async function POST(request: Request) {
 
   } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     console.error('Internal server error.', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

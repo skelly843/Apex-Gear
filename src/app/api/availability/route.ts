@@ -5,6 +5,9 @@ import { addMinutes, format, isBefore, isEqual, parseISO } from 'date-fns';
 const APPOINTMENT_GAP_MINUTES = 45;
 
 export async function GET(request: Request) {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
   const { searchParams } = new URL(request.url);
   const date = searchParams.get('date');
   const serviceId = searchParams.get('serviceId');

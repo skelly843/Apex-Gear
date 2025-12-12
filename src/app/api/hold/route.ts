@@ -5,6 +5,9 @@ import { holdSchema } from '@/lib/schemas';
 import { ZodError } from 'zod';
 
 export async function POST(request: Request) {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
   console.log('Received request to /api/hold');
   try {
     const json = await request.json();
@@ -75,7 +78,7 @@ export async function POST(request: Request) {
 
   } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     console.error('Internal server error.', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DayPicker, DayModifiers } from 'react-day-picker';
+import { DayPicker, DayProps } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import { format, startOfMonth } from 'date-fns';
 
@@ -15,6 +15,23 @@ type Assignment = {
   allow_mixed: boolean;
   zones?: { name: string };
 };
+
+function CustomDay(props: DayProps & { assignments: Record<string, Assignment> }) {
+    const { day, assignments } = props;
+    const date = day.date;
+    const dateString = format(date, 'yyyy-MM-dd');
+    const assignment = assignments[dateString];
+
+    return (
+        <div className="text-center">
+            <div>{date.getDate()}</div>
+            {assignment && !assignment.is_closed && (
+                <div className="text-xs text-blue-600">{assignment.zones?.name || 'Mixed'}</div>
+            )}
+        </div>
+    );
+}
+
 
 export default function ScheduleAdminPage() {
   const [zones, setZones] = useState<Zone[]>([]);
@@ -81,18 +98,6 @@ export default function ScheduleAdminPage() {
     }
   };
 
-  const DayContent = ({ date }: { date: Date }) => {
-    const dateString = format(date, 'yyyy-MM-dd');
-    const assignment = assignments[dateString];
-    if (!assignment || assignment.is_closed) return <div className="text-center">{date.getDate()}</div>;
-    return (
-      <div className="text-center">
-        <div>{date.getDate()}</div>
-        <div className="text-xs text-blue-600">{assignment.zones?.name || 'Mixed'}</div>
-      </div>
-    );
-  };
-
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Manage Schedule</h1>
@@ -104,7 +109,7 @@ export default function ScheduleAdminPage() {
             onSelect={setSelectedDate}
             month={currentMonth}
             onMonthChange={setCurrentMonth}
-            components={{ DayContent: DayContent as any }}
+            components={{ Day: (props) => <CustomDay {...props} assignments={assignments} /> }}
             className="border rounded-lg p-4"
           />
         </div>

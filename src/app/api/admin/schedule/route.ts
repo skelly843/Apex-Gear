@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 
 export async function GET(request: Request) {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
   const { searchParams } = new URL(request.url);
   const month = searchParams.get('month'); // e.g., '2024-08'
 
@@ -27,6 +30,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
   const assignment = await request.json();
 
   // Use upsert to create or update the assignment for a specific date

@@ -2,6 +2,9 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
+  if (!supabaseAdmin) {
+    return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
+  }
   const { data, error } = await supabaseAdmin
     .from('bookings')
     .select('*, service_types(name)')
