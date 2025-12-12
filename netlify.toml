@@ -1,0 +1,11 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Scheduled function to expire old booking holds
+[functions]
+  [functions."expire-holds"]
+    schedule = "*/5 * * * *"
