@@ -2,22 +2,34 @@ import Link from 'next/link';
 
 const featuredServices = [
   {
-    id: 2, // Assuming 'Diagnostics' will have ID 2 in the seeded data
+    id: 2, // Corresponds to 'Diagnostics' in the seed script
     name: 'Diagnostics',
     description: 'Full system diagnostic to identify any issues with your vehicle.',
     price: '$100',
   },
   {
-    id: 3, // Assuming 'Service 1' will have ID 3
+    id: 3, // Corresponds to 'Service 1'
     name: 'Service 1',
     description: 'Includes an oil change, new oil filter, new air filter, and a full diagnostic.',
-    price: '$240 (plus supplies)',
+    price: '$240 (plus cost of supplies)',
   },
   {
-    id: null, // Placeholder for the third service
-    name: 'Upcoming Service',
-    description: 'Details for our next featured service will be available soon.',
-    price: 'Contact for pricing',
+    id: 4, // Corresponds to 'Service 2'
+    name: 'Service 2',
+    description: 'Includes oil/filter, air filter, carb clean, coolant flush, front and rear differential fluid, brake fluid, cable lube, chain clean, grease fittings flushed and filled, spark plugs, diagnostics and inspection.',
+    price: '$480 (plus cost of supplies)',
+  },
+  {
+    id: 5, // Corresponds to 'Service 3'
+    name: 'Service 3',
+    description: 'Top-end engine rebuild.',
+    price: '$320 (plus cost of supplies)',
+  },
+  {
+    id: 6, // Corresponds to 'Service 4'
+    name: 'Service 4',
+    description: 'Low-end/transmission rebuild.',
+    price: '$640 (plus cost of supplies)',
   },
 ];
 
@@ -35,7 +47,7 @@ export default function HomePage() {
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-          <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+          <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
             {featuredServices.map((service) => (
               <div key={service.name} className="flex flex-col border rounded-lg p-6 shadow-sm">
                 <dt className="text-lg font-semibold leading-7 text-gray-900">
@@ -44,25 +56,29 @@ export default function HomePage() {
                 <dd className="mt-1 flex flex-auto flex-col text-base leading-7 text-gray-600">
                   <p className="flex-auto">{service.description}</p>
                   <p className="mt-4 font-semibold text-gray-800">{service.price}</p>
-                  {service.id ? (
-                    <Link
-                      href={`/book/address?serviceId=${service.id}`}
-                      className="mt-6 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 text-center"
-                    >
-                      Book Now
-                    </Link>
-                  ) : (
-                    <button
-                      disabled
-                      className="mt-6 rounded-md bg-gray-400 px-3.5 py-2.5 text-sm font-semibold text-white text-center cursor-not-allowed"
-                    >
-                      Coming Soon
-                    </button>
-                  )}
+                  <Link
+                    href={`/book/address?serviceId=${service.id}`}
+                    className="mt-6 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 text-center"
+                  >
+                    Book Now
+                  </Link>
                 </dd>
               </div>
             ))}
           </dl>
+        </div>
+        <div className="mt-16 rounded-2xl bg-gray-50 px-8 py-10 text-center">
+            <h3 className="text-xl font-semibold tracking-tight text-gray-900">
+                Need something else?
+            </h3>
+            <p className="mt-4 text-lg leading-8 text-gray-600">
+                Anything specific outside of these services can be requested by contacting customer care.
+            </p>
+            <p className="mt-6">
+                <a href="tel:9415649798" className="text-lg font-semibold text-indigo-600">
+                    Call or Text: (941) 564-9798
+                </a>
+            </p>
         </div>
       </div>
     </div>

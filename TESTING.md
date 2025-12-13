@@ -18,7 +18,10 @@ INSERT INTO service_types (id, name, description, duration_minutes, price_cents,
 VALUES
   (1, 'Standard Oil Change', 'Includes up to 5 quarts of synthetic-blend oil and a new filter.', 45, 6500, true),
   (2, 'Diagnostics', 'Full system diagnostic to identify any issues with your vehicle.', 60, 10000, true),
-  (3, 'Service 1', 'Includes an oil change, new oil filter, new air filter, and a full diagnostic.', 90, 24000, true)
+  (3, 'Service 1', 'Includes an oil change, new oil filter, new air filter, and a full diagnostic.', 90, 24000, true),
+  (4, 'Service 2', 'Includes oil/filter, air filter, carb clean, coolant flush, front and rear differential fluid, brake fluid, cable lube, chain clean, grease fittings flushed and filled, spark plugs, diagnostics and inspection.', 180, 48000, true),
+  (5, 'Service 3', 'Top-end engine rebuild.', 240, 32000, true),
+  (6, 'Service 4', 'Low-end/transmission rebuild.', 480, 64000, true)
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   description = EXCLUDED.description,

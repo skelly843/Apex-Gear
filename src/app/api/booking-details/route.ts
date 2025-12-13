@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'; // Using the public client
+import { supabaseAdmin } from '@/lib/supabase'; // Using the admin client
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -9,11 +9,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 });
   }
 
-  if (!supabase) {
+  if (!supabaseAdmin) {
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('bookings')
     .select(`
       start_time,
