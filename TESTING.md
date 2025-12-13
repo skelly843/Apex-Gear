@@ -15,8 +15,16 @@ Before running these tests, you need to seed your Supabase database with some in
 
 -- Create a sample service (if it doesn't exist)
 INSERT INTO service_types (id, name, description, duration_minutes, price_cents, active)
-VALUES (1, 'Standard Oil Change', 'Includes up to 5 quarts of synthetic-blend oil and a new filter.', 45, 6500, true)
-ON CONFLICT (id) DO NOTHING;
+VALUES
+  (1, 'Standard Oil Change', 'Includes up to 5 quarts of synthetic-blend oil and a new filter.', 45, 6500, true),
+  (2, 'Diagnostics', 'Full system diagnostic to identify any issues with your vehicle.', 60, 10000, true),
+  (3, 'Service 1', 'Includes an oil change, new oil filter, new air filter, and a full diagnostic.', 90, 24000, true)
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  duration_minutes = EXCLUDED.duration_minutes,
+  price_cents = EXCLUDED.price_cents,
+  active = EXCLUDED.active;
 
 -- Create a sample zone for Austin, TX (if it doesn't exist)
 INSERT INTO zones (id, name, type, zip_codes, active)
@@ -42,22 +50,21 @@ ON CONFLICT (date) DO UPDATE SET
 **Goal:** Verify a customer can successfully book an appointment within a defined service area.
 
 1.  **Navigate** to the application's home page.
-2.  **Click** the "Book Now" button.
-3.  **Select** the "Standard Oil Change" service.
-4.  **Enter** an address within the "Austin Metro" zone (e.g., "1100 Congress Ave, Austin, TX 78701").
-5.  **Click** "Check Availability".
-6.  **Select** tomorrow's date on the calendar.
-7.  **Verify** that a list of time slots is displayed (e.g., 9:00 AM, 9:15 AM, etc.).
-8.  **Select** the first available time slot (e.g., 9:00 AM).
-9.  **Fill out** the customer details form and click "Confirm Booking".
-10. **Expected Result:** You should be redirected to the booking confirmation page. In your Supabase dashboard, a new entry should appear in the `bookings` table with a `CONFIRMED` status.
+2.  **Click** the "Book Now" button for "Diagnostics".
+3.  **Enter** an address within the "Austin Metro" zone (e.g., "1100 Congress Ave, Austin, TX 78701").
+4.  **Click** "Check Availability".
+5.  **Select** tomorrow's date on the calendar.
+6.  **Verify** that a list of time slots is displayed.
+7.  **Select** the first available time slot.
+8.  **Fill out** the customer details form and click "Confirm Booking".
+9.  **Expected Result:** You should be redirected to the booking confirmation page with the correct booking details.
 
 ### Test Case 2: Out-of-Zone Flow
 
 **Goal:** Verify the out-of-zone contact form is shown for addresses outside the service area.
 
-1.  **Start** from the service selection page.
-2.  **Select** the "Standard Oil Change" service.
+1.  **Navigate** to the home page.
+2.  **Click** the "Book Now" button for "Service 1".
 3.  **Enter** an address outside the defined zone (e.g., "100 Main Street, Dallas, TX 75201").
 4.  **Click** "Check Availability".
 5.  **Expected Result:** The page should display the "Outside Our Service Area" message, along with contact links and a request form. The availability calendar should **not** be visible.
@@ -66,12 +73,13 @@ ON CONFLICT (date) DO UPDATE SET
 
 **Goal:** Verify that two customers cannot book the same time slot.
 
-1.  **Open** the booking availability page for tomorrow in two separate browser tabs (or windows).
-2.  In **Tab 1**, select the 10:00 AM time slot to proceed to the checkout page. **Do not submit yet.**
-3.  In **Tab 2**, select the same 10:00 AM time slot.
-4.  **Complete** the booking in Tab 2 by filling out the form and clicking "Confirm Booking". The booking should succeed.
-5.  **Return** to Tab 1 and complete the booking for the same 10:00 AM slot.
-6.  **Expected Result:** The booking in Tab 1 should fail with an error message like "Slot is no longer available".
+1.  **Follow the steps** for an in-zone booking up to the point of selecting a time slot.
+2.  **Open** the availability page for the same day in two separate browser tabs.
+3.  In **Tab 1**, select the 10:00 AM time slot to proceed to the checkout page. **Do not submit yet.**
+4.  In **Tab 2**, select the same 10:00 AM time slot.
+5.  **Complete** the booking in Tab 2. The booking should succeed.
+6.  **Return** to Tab 1 and complete the booking for the same 10:00 AM slot.
+7.  **Expected Result:** The booking in Tab 1 should fail with an error message like "Slot is no longer available".
 
 ### Test Case 4: Admin Time-Blocking
 
@@ -81,14 +89,14 @@ ON CONFLICT (date) DO UPDATE SET
 2.  **Navigate** to the "Blocks" page.
 3.  **Create** a new block for tomorrow from 1:00 PM to 2:00 PM.
 4.  **Open** the customer booking flow in a new private browser window.
-5.  **Navigate** to the availability page for tomorrow.
+5.  **Navigate** to the availability page for tomorrow for any service.
 6.  **Expected Result:** The time slots between 1:00 PM and 2:00 PM should not be available for booking.
 
 ### Test Case 5: Mobile UI/UX
 
 **Goal:** Verify the application is clean and usable on a mobile device.
 
-1.  **Open** your browser's developer tools and switch to a mobile device view (e.g., iPhone 12/13).
-2.  **Navigate** through the entire customer booking flow, from the home page to the confirmation page.
-3.  **Log in** to the admin panel and navigate through the different management pages.
-4.  **Expected Result:** All pages should be readable and easy to navigate. Form inputs should be usable, and there should be no visual glitches or overlapping elements.
+1.  **Open** your browser's developer tools and switch to a mobile device view.
+2.  **Navigate** through the entire customer booking flow.
+3.  **Log in** to the admin panel and check the different management pages.
+4.  **Expected Result:** All pages should be readable, usable, and free of visual glitches.

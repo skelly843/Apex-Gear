@@ -3,7 +3,8 @@
 import { useState, FormEvent, useEffect } from 'react';
 
 // This should be in a shared types file
-export type Zone = {
+import { Zone } from '@/lib/types';
+// Previous definition removed = {
   id?: number;
   name: string;
   type: 'zip_list' | 'radius';

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { ServiceForm } from './ServiceForm';
 
-export type Service = {
+import { Service } from '@/lib/types';
+// Previous definition removed = {
   id?: number;
   name: string;
   description: string;

@@ -3,7 +3,8 @@
 import { useState, FormEvent, useEffect } from 'react';
 
 // This should be in a shared types file
-export type Block = {
+import { Block } from '@/lib/types';
+// Previous definition removed = {
   id?: number;
   start_time: string;
   end_time: string;
