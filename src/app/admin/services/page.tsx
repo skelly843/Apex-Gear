@@ -2,17 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ServiceForm } from './ServiceForm';
-
 import { Service } from '@/lib/types';
-// Previous definition removed = {
-  id?: number;
-  name: string;
-  description: string;
-  duration_minutes: number;
-  price_cents: number;
-  deposit_cents?: number | null;
-  active: boolean;
-};
 
 export default function ServicesAdminPage() {
   const [services, setServices] = useState<Service[]>([]);

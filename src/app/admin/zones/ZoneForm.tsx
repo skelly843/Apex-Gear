@@ -1,19 +1,9 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
-
-// This should be in a shared types file
 import { Zone } from '@/lib/types';
-// Previous definition removed = {
-  id?: number;
-  name: string;
-  type: 'zip_list' | 'radius';
-  zip_codes?: string[];
-  center_lat?: number | null;
-  center_lng?: number | null;
-  radius_miles?: number | null;
-  active: boolean;
-};
+
+export type { Zone };
 
 type Props = {
   zone: Zone | null;

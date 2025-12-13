@@ -1,15 +1,9 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
-
-// This should be in a shared types file
 import { Block } from '@/lib/types';
-// Previous definition removed = {
-  id?: number;
-  start_time: string;
-  end_time: string;
-  reason: string;
-};
+
+export type { Block };
 
 type Props = {
   block: Block | null;

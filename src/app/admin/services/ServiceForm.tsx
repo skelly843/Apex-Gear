@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, FormEvent, useEffect } from 'react';
-import { Service } from './page';
+import { Service } from '@/lib/types';
+
+export type { Service };
 
 type Props = {
   service: Service | null;
