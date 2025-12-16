@@ -41,8 +41,16 @@ export async function middleware(request: NextRequest) {
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/admin/login');
 
-  if (!session && !isAuthPage) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
+  if (request.nextUrl.pathname.startsWith('/admin') && !isAuthPage) {
+    if (!session) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+
+    const isAdmin = session.user?.user_metadata?.is_admin === true;
+    if (!isAdmin) {
+      // Redirect non-admins to the home page or a dedicated 'unauthorized' page
+      return NextResponse.redirect(new URL('/', request.url));
+    }
   }
 
   if (session && isAuthPage) {

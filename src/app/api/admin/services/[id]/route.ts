@@ -8,7 +8,7 @@ export async function PUT(
   if (!supabaseAdmin) {
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
   }
-  const params = await context.params;
+  const { params } = context;
   const service = await request.json();
 
   const { data, error } = await supabaseAdmin
@@ -32,7 +32,7 @@ export async function DELETE(
   if (!supabaseAdmin) {
     return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 });
   }
-  const params = await context.params;
+  const { params } = context;
   const { error } = await supabaseAdmin
     .from('service_types')
     .delete()

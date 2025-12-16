@@ -1,64 +1,63 @@
 import Link from 'next/link';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { Database } from '@/lib/database.types';
 
-const featuredServices = [
-  {
-    id: 2, // Corresponds to 'Diagnostics' in the seed script
-    name: 'Diagnostics',
-    description: 'Full system diagnostic to identify any issues with your vehicle.',
-    price: '$100',
-  },
-  {
-    id: 3, // Corresponds to 'Service 1'
-    name: 'Service 1',
-    description: 'Includes an oil change, new oil filter, new air filter, and a full diagnostic.',
-    price: '$240 (plus cost of supplies)',
-  },
-  {
-    id: 4, // Corresponds to 'Service 2'
-    name: 'Service 2',
-    description: 'Includes oil/filter, air filter, carb clean, coolant flush, front and rear differential fluid, brake fluid, cable lube, chain clean, grease fittings flushed and filled, spark plugs, diagnostics and inspection.',
-    price: '$480 (plus cost of supplies)',
-  },
-  {
-    id: 5, // Corresponds to 'Service 3'
-    name: 'Service 3',
-    description: 'Top-end engine rebuild.',
-    price: '$320 (plus cost of supplies)',
-  },
-  {
-    id: 6, // Corresponds to 'Service 4'
-    name: 'Service 4',
-    description: 'Low-end/transmission rebuild.',
-    price: '$640 (plus cost of supplies)',
-  },
-];
+// Helper to format price
+const formatPrice = (priceInCents: number | null) => {
+  if (priceInCents === null) return 'N/A';
+  return `$${(priceInCents / 100).toFixed(2)}`;
+};
 
-export default function HomePage() {
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const supabase = createServerClient<Database>(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value
+        },
+      },
+    }
+  );
+  const { data: services, error } = await supabase
+    .from('service_types')
+    .select('*')
+    .eq('active', true)
+    .order('name') as { data: Database['public']['Tables']['service_types']['Row'][] | null; error: any };
+
+  if (error) {
+    console.error('Error fetching services:', error);
+    // You might want to render an error state here
+  }
+
   return (
     <div className="bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base font-semibold leading-7 text-indigo-600">Our Services</h2>
+          <h2 className="text-base font-semibold leading-7 text-apex-blue-600">Apex Gear LLC</h2>
           <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Convenient Mobile Mechanic Services
+            Apex Gear LLC – Mobile Mechanic & Powersports Service
           </p>
           <p className="mt-6 text-lg leading-8 text-gray-600">
-            Get your car serviced at your home or office. Easy online booking for our most popular services.
+            Certified. Convenient. Done Right.
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
           <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-2">
-            {featuredServices.map((service) => (
-              <div key={service.name} className="flex flex-col border rounded-lg p-6 shadow-sm">
+            {services?.map((service) => (
+              <div key={service.id} className="flex flex-col border rounded-lg p-6 shadow-sm">
                 <dt className="text-lg font-semibold leading-7 text-gray-900">
                   {service.name}
                 </dt>
                 <dd className="mt-1 flex flex-auto flex-col text-base leading-7 text-gray-600">
                   <p className="flex-auto">{service.description}</p>
-                  <p className="mt-4 font-semibold text-gray-800">{service.price}</p>
+                  <p className="mt-4 font-semibold text-gray-800">{formatPrice(service.price_cents)}</p>
                   <Link
                     href={`/book/address?serviceId=${service.id}`}
-                    className="mt-6 rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 text-center"
+                    className="mt-6 rounded-md bg-apex-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-apex-blue-500 text-center"
                   >
                     Book Now
                   </Link>
@@ -75,7 +74,7 @@ export default function HomePage() {
                 Anything specific outside of these services can be requested by contacting customer care.
             </p>
             <p className="mt-6">
-                <a href="tel:9415649798" className="text-lg font-semibold text-indigo-600">
+                <a href="tel:9415649798" className="text-lg font-semibold text-apex-blue-600">
                     Call or Text: (941) 564-9798
                 </a>
             </p>

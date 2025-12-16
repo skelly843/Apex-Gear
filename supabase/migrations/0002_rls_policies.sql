@@ -17,7 +17,7 @@ USING (active = true);
 CREATE POLICY "Allow admin full access on service_types" ON "service_types"
 FOR ALL
 TO authenticated
-USING (true);
+USING (is_admin());
 
 -- Policies for zones
 -- Allow public read access for active zones
@@ -30,7 +30,7 @@ USING (active = true);
 CREATE POLICY "Allow admin full access on zones" ON "zones"
 FOR ALL
 TO authenticated
-USING (true);
+USING (is_admin());
 
 -- Policies for zone_day_assignments
 -- Allow public read access
@@ -43,7 +43,7 @@ USING (true);
 CREATE POLICY "Allow admin full access on zone_day_assignments" ON "zone_day_assignments"
 FOR ALL
 TO authenticated
-USING (true);
+USING (is_admin());
 
 -- Policies for bookings
 -- Deny all access to bookings from public
@@ -56,7 +56,7 @@ USING (false);
 CREATE POLICY "Allow admin full access on bookings" ON "bookings"
 FOR ALL
 TO authenticated
-USING (true);
+USING (is_admin());
 
 -- Policies for blocks
 -- Deny all access to blocks from public
@@ -69,7 +69,7 @@ USING (false);
 CREATE POLICY "Allow admin full access on blocks" ON "blocks"
 FOR ALL
 TO authenticated
-USING (true);
+USING (is_admin());
 
 -- Policies for booking_requests
 -- Allow public to create booking requests
@@ -88,4 +88,4 @@ USING (false);
 CREATE POLICY "Allow admin full access on booking_requests" ON "booking_requests"
 FOR ALL
 TO authenticated
-USING (true);
+USING (is_admin());

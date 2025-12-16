@@ -16,12 +16,11 @@ Before running these tests, you need to seed your Supabase database with some in
 -- Create a sample service (if it doesn't exist)
 INSERT INTO service_types (id, name, description, duration_minutes, price_cents, active)
 VALUES
-  (1, 'Standard Oil Change', 'Includes up to 5 quarts of synthetic-blend oil and a new filter.', 45, 6500, true),
   (2, 'Diagnostics', 'Full system diagnostic to identify any issues with your vehicle.', 60, 10000, true),
-  (3, 'Service 1', 'Includes an oil change, new oil filter, new air filter, and a full diagnostic.', 90, 24000, true),
-  (4, 'Service 2', 'Includes oil/filter, air filter, carb clean, coolant flush, front and rear differential fluid, brake fluid, cable lube, chain clean, grease fittings flushed and filled, spark plugs, diagnostics and inspection.', 180, 48000, true),
-  (5, 'Service 3', 'Top-end engine rebuild.', 240, 32000, true),
-  (6, 'Service 4', 'Low-end/transmission rebuild.', 480, 64000, true)
+  (3, 'Full Synthetic Oil Change', 'Includes up to 2 quarts of full synthetic oil and a new oil filter.', 45, 8000, true),
+  (4, 'Full Service', 'Includes oil/filter, air filter, carb clean, coolant flush, front and rear differential fluid, brake fluid, cable lube, chain clean, grease fittings flushed and filled, spark plugs, diagnostics and inspection.', 180, 48000, true),
+  (5, 'Top-End Rebuild', 'Complete top-end engine rebuild with new piston, rings, and gaskets.', 240, 32000, true),
+  (6, 'Low-End / Transmission Rebuild', 'Complete low-end and transmission inspection and rebuild.', 480, 64000, true)
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   description = EXCLUDED.description,

@@ -6,8 +6,8 @@ import ClientWrapper from "./ClientWrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Mobile Mechanic Booking",
-  description: "Book your mobile mechanic service online.",
+  title: "Apex Gear LLC | Mobile Mechanic",
+  description: "Expert mobile mechanic services for ATVs, UTVs, and dirt bikes at your home or office.",
 };
 
 export default function RootLayout({
