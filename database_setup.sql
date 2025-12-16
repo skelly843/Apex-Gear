@@ -97,6 +97,20 @@ BEGIN
     WHERE status = 'HOLD' AND created_at < NOW() - INTERVAL '10 minutes';
 END;
 $$ LANGUAGE plpgsql;
+-- supabase/migrations/0003_admin_security.sql
+
+-- Helper function to check for a custom 'admin' claim on the authenticated user.
+create or replace function is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean,
+    false
+  );
+$$;
 -- Enable RLS for all tables
 ALTER TABLE "service_types" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "zones" ENABLE ROW LEVEL SECURITY;
@@ -188,20 +202,6 @@ CREATE POLICY "Allow admin full access on booking_requests" ON "booking_requests
 FOR ALL
 TO authenticated
 USING (is_admin());
--- supabase/migrations/0003_admin_security.sql
-
--- Helper function to check for a custom 'admin' claim on the authenticated user.
-create or replace function is_admin()
-returns boolean
-language sql
-security definer
-set search_path = public
-as $$
-  select coalesce(
-    (auth.jwt() -> 'user_metadata' ->> 'is_admin')::boolean,
-    false
-  );
-$$;
 -- This script is safe to run multiple times.
 
 -- Create a sample service (if it doesn't exist)
